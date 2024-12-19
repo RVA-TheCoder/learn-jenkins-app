@@ -27,7 +27,7 @@ pipeline {
             steps{
                 sh """
                     echo 'Test stage' 
-                    test -e /build/index.html && echo 'File exist' ||  echo           
+                    test -e /build/index.html && echo "File exist" || echo           
                 """
             }
         }
