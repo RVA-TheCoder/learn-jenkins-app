@@ -21,5 +21,22 @@ pipeline {
                 '''
             }
         }
+        stage ("Test") {
+            agent any
+
+            steps{
+                sh """
+                    echo 'Test stage' 
+                    test -e /build/index.html && echo 'File exist' ||  echo           
+                """
+            }
+        }
     }
 }
+
+
+
+
+
+
+
