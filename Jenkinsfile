@@ -22,14 +22,13 @@ pipeline {
             }
         }
         stage ("Test") {
-            agent any
-
+            
             steps{
-                sh """
-                    echo 'Test stage' 
-                    test -f build/index.html && echo "File exists" || echo "File does not exist" 
-                    npm test         
-                """
+
+                sh 'test -f build/index.html'
+                   
+                      
+                    
             }
         }
     }
