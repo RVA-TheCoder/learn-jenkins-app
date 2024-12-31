@@ -53,7 +53,7 @@ pipeline {
             agent {
                 docker {
                     // Playwright docker image, link : https://playwright.dev/docs/docker
-                    image 'mcr.microsoft.com/playwright:v1.39.0-noble'
+                    image 'mcr.microsoft.com/playwright:v1.49.1-noble'
                     reuseNode true
 
                     /*args -u 'root:root' -> this command will start the container as a root user.
