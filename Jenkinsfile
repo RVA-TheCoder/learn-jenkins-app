@@ -7,7 +7,7 @@ pipeline {
         if we want a shell command to be commented out in the shell script use # in front of it.
         eg. : #ls -la */
 
-        /*
+        
         stage('Build') {
 
             agent {
@@ -27,7 +27,7 @@ pipeline {
                 '''
             }
         }
-        */ 
+        
         stage ("Test") {
 
             agent {
