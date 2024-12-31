@@ -53,7 +53,7 @@ pipeline {
             agent {
                 docker {
                     // Playwright docker image, link : https://playwright.dev/docs/docker
-                    image 'mcr.microsoft.com/playwright:v1.49.1-noble'
+                    image 'mcr.microsoft.com/playwright:v1.39.0-noble'
                     reuseNode true
 
                     /*args -u 'root:root' -> this command will start the container as a root user.
@@ -74,7 +74,7 @@ pipeline {
                     # & : this at the end , will start the server in the background and rest of the pipeline steps will be executed.
                     node_modules/.bin/serve -s build &
                     sleep 10
-                    
+
                     npx playwright test
                 ''' 
                          
