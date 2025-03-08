@@ -1,3 +1,7 @@
+
+note : when we run 'npm install' at the terminal , then it will create the node_modules folder inside the project directory.
+
+
 # Learn Jenkins App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
