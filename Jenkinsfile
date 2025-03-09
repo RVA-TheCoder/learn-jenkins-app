@@ -43,7 +43,7 @@ pipeline {
 
                 
                 sh '''
-                    
+                    #echo 'Inside Test stage'
                     # test -f build/index.html   
                     
                     test -f build/index.html && echo "File exists"
