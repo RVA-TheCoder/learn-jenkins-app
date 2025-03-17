@@ -31,6 +31,7 @@ pipeline {
             }
         } 
         */
+
         stage("Tests") {
 
             parallel {
@@ -111,7 +112,25 @@ pipeline {
             }
         }
 
+        stage('Build') {
 
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+
+                    # we are installing netlify as a local project dependency
+                    npm install netlify-cli
+
+                    node_modules/.bin/netlify --version
+                    
+                '''
+            }
+        }
         
     }
 
