@@ -6,6 +6,7 @@ pipeline {
 
         NETLIFY_SITE_ID = '2237487a-ebf2-4e48-b243-41c611efccae'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+        
     }
 
     stages {
@@ -73,7 +74,7 @@ pipeline {
 
                 }
 
-                stage('E2E') {
+                stage('E2E local') {
 
                     agent {
 
@@ -110,7 +111,7 @@ pipeline {
 
                     post {
                         always {                               
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])   
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E local', reportTitles: '', useWrapperFileDirectly: true])   
                         }
                     }
 
@@ -144,6 +145,50 @@ pipeline {
                 '''
             }
         }
+
+        stage('Prod E2E Test') {
+
+            agent {
+
+                docker {
+                    // Playwright docker image, link : https://playwright.dev/docs/docker
+                    image 'mcr.microsoft.com/playwright:v1.49.1-noble'
+                    reuseNode true
+
+                    /*args -u 'root:root' -> this command will start the container as a root user.
+                    Dont do this because we are currently accessing the workspace as a user: aakash sharma, 
+                    later it will throw error regarding workspace files access permission 
+                    from aakash sharma user to root user. */
+                }
+            }
+
+            environment {
+
+                CI_ENVIRONMENT_URL = 'https://sensational-cobbler-19e2d0.netlify.app'
+            }
+                          
+                    
+            steps {
+
+                //sh 'test -f build/index.html'
+                sh '''
+
+                    npx playwright test --reporter=html
+                ''' 
+                
+            }
+
+
+            post {
+                always {                               
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E Prod', reportTitles: '', useWrapperFileDirectly: true])   
+                }
+            }
+
+          
+        }
+
+
         
     }
 
