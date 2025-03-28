@@ -120,7 +120,7 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy Staging') {
 
             agent {
                 docker {
@@ -128,6 +128,35 @@ pipeline {
                     reuseNode true
                 }
             }
+            
+            steps {
+                sh '''
+
+                    # we are installing netlify as a local project dependency
+                    npm install netlify-cli
+
+                    node_modules/.bin/netlify --version
+
+                    echo "Deploying to Staging. Site ID : $NETLIFY_SITE_ID"
+                    
+                    # used to check the current authentication status and team information for the Netlify account we're logged into.
+                    node_modules/.bin/netlify status  
+ 
+                    node_modules/.bin/netlify deploy --dir=build 
+
+                '''
+            }
+        }
+
+        stage('Deploy Production') {
+
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            
             steps {
                 sh '''
 
@@ -138,6 +167,7 @@ pipeline {
 
                     echo "Deploying to production. Site ID : $NETLIFY_SITE_ID"
                     
+                    # used to check the current authentication status and team information for the Netlify account we're logged into.
                     node_modules/.bin/netlify status
 
                     node_modules/.bin/netlify deploy --dir=build --prod
@@ -145,6 +175,8 @@ pipeline {
                 '''
             }
         }
+
+
 
         stage('Prod E2E Test') {
 
