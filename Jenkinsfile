@@ -152,8 +152,56 @@ pipeline {
                     node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
 
                 '''
+
+                script {
+                    env.STAGING_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout:true)
+                }
             }
         }
+
+        stage('Staging E2E Test') {
+
+                    agent {
+
+                        docker {
+                            // Playwright docker image, link : https://playwright.dev/docs/docker
+                            image 'mcr.microsoft.com/playwright:v1.49.1-noble'
+                            reuseNode true
+
+                            /*args -u 'root:root' -> this command will start the container as a root user.
+                            Dont do this because we are currently accessing the workspace as a user: aakash sharma, 
+                            later it will throw error regarding workspace files access permission 
+                            from aakash sharma user to root user. */
+                        }
+                    }
+
+                    environment {
+
+                        CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
+                    }
+                                
+                            
+                    steps {
+
+                        //sh 'test -f build/index.html'
+                        sh '''
+
+                            npx playwright test --reporter=html
+                        ''' 
+                        
+                    }
+
+
+                    post {
+                        always {                               
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E staging', reportTitles: '', useWrapperFileDirectly: true])   
+                        }
+                    }
+
+                
+        }
+
+
 
         stage('Approval') {
 
