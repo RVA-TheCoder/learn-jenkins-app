@@ -11,13 +11,14 @@ pipeline {
 
     stages {
 
+        /*
         stage('Docker') {
 
             steps {
                 sh 'docker build -t my-playwright-image .'
             }
 
-        }
+        } */
 
 
         // Single line comment
@@ -132,46 +133,8 @@ pipeline {
             }
         }
 
-        stage('Deploy Staging') {
 
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            
-            steps {
-                sh '''
-
-                    # we are installing netlify as a local project dependency
-                    npm install netlify-cli node-jq
-
-                    node_modules/.bin/netlify --version
-
-                    echo "Deploying to Staging. Site ID : $NETLIFY_SITE_ID"
-                    
-                    # used to check the current authentication status and team information for the Netlify account we're logged into.
-                    node_modules/.bin/netlify status  
-
-                    # Deploys the project to Netlify using the build directory as the source.
-                    # The --json flag outputs the response in JSON format and saves it in deploy-output.json.
-                    node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
-
-                    # Uses node-jq to parse the JSON output and extract the deploy_url field, which contains the deployed site's URL.
-                    # The . (period) in .deploy_url is used in JSON parsing with jq (or node-jq) to specify the field that we want to extract from the JSON structure.
-                    # The . (dot) before deploy_url means that we are accessing a top-level key in the JSON.
-                    node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
-
-                '''
-
-                script {
-                    env.STAGING_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout:true)
-                }
-            }
-        }
-
-        stage('Staging E2E Test') {
+        stage('Deploy Staging & E2E Test') {
 
                     agent {
 
@@ -187,17 +150,34 @@ pipeline {
                         }
                     }
 
-                    environment {
-
-                        CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
-                    }
-                                
+             
                             
                     steps {
 
                         //sh 'test -f build/index.html'
                         sh '''
 
+                            # we are installing netlify as a local project dependency
+                            npm install netlify-cli node-jq
+
+                            node_modules/.bin/netlify --version
+
+                            echo "Deploying to Staging. Site ID : $NETLIFY_SITE_ID"
+                    
+                            # used to check the current authentication status and team information for the Netlify account we're logged into.
+                            node_modules/.bin/netlify status  
+
+                            # Deploys the project to Netlify using the build directory as the source.
+                            # The --json flag outputs the response in JSON format and saves it in deploy-output.json.
+                            node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
+                            sleep 5
+
+                            # Uses node-jq to parse the JSON output and extract the deploy_url field, which contains the deployed site's URL.
+                            # The . (period) in .deploy_url is used in JSON parsing with jq (or node-jq) to specify the field that we want to extract from the JSON structure.
+                            # The . (dot) before deploy_url means that we are accessing a top-level key in the JSON.
+                            # node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
+
+                            CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
                             npx playwright test --reporter=html
                         ''' 
                         
