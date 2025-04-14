@@ -55,11 +55,8 @@ pipeline {
             parallel {
 
                 stage('Units tests') {
-
                     agent {
-
                         docker {
-
                             image 'node:18-alpine'
                             reuseNode true
                         }
@@ -67,6 +64,7 @@ pipeline {
 
                     steps {
 
+                
                         sh '''
                             #echo 'Inside Test stage'
                             # test -f build/index.html   
@@ -224,7 +222,37 @@ pipeline {
         }
 
 
-        stage('Deploy Production & E2E Test') {
+        stage('Deploy Production') {
+
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            
+            steps {
+                sh '''
+
+                    # we are installing netlify as a local project dependency
+                    npm install netlify-cli
+
+                    node_modules/.bin/netlify --version
+
+                    echo "Deploying to production. Site ID : $NETLIFY_SITE_ID"
+                    
+                    # used to check the current authentication status and team information for the Netlify account we're logged into.
+                    node_modules/.bin/netlify status
+
+                    node_modules/.bin/netlify deploy --dir=build --prod
+
+                '''
+            }
+        }
+
+
+
+        stage('Prod E2E Test') {
 
             agent {
 
@@ -250,20 +278,6 @@ pipeline {
 
                 //sh 'test -f build/index.html'
                 sh '''
-                    node --version
-
-                    # we are installing netlify as a local project dependency
-                    npm install netlify-cli
-
-                    node_modules/.bin/netlify --version
-
-                    echo "Deploying to production. Site ID : $NETLIFY_SITE_ID"
-                    
-                    # used to check the current authentication status and team information for the Netlify account we're logged into.
-                    node_modules/.bin/netlify status
-
-                    node_modules/.bin/netlify deploy --dir=build --prod
-                    sleep 5
 
                     npx playwright test --reporter=html
                 ''' 
