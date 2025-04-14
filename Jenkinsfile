@@ -150,7 +150,10 @@ pipeline {
                     }
             }
 
+            environment {
 
+                CI_ENVIRONMENT_URL = 'STAGING_URL_TO_BE_SET'
+            }
                             
             steps {
 
@@ -178,8 +181,8 @@ pipeline {
                     # node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
 
                     CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
-                    #npx playwright test --reporter=html
-                    npx playwright test --reporter=html --project=chromium --base-url=$CI_ENVIRONMENT_URL
+                    npx playwright test --reporter=html
+                    
                 ''' 
                 
             }
