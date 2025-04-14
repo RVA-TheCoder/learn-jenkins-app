@@ -136,59 +136,60 @@ pipeline {
 
         stage('Deploy Staging & E2E Test') {
 
-                    agent {
+            agent {
 
-                        docker {
-                            // Playwright docker image, link : https://playwright.dev/docs/docker
-                            image 'mcr.microsoft.com/playwright:v1.49.1-noble'
-                            reuseNode true
+                docker {
+                        // Playwright docker image, link : https://playwright.dev/docs/docker
+                        image 'mcr.microsoft.com/playwright:v1.49.1-noble'
+                        reuseNode true
 
-                            /*args -u 'root:root' -> this command will start the container as a root user.
-                            Dont do this because we are currently accessing the workspace as a user: aakash sharma, 
-                            later it will throw error regarding workspace files access permission 
-                            from aakash sharma user to root user. */
-                        }
+                        /*args -u 'root:root' -> this command will start the container as a root user.
+                        Dont do this because we are currently accessing the workspace as a user: aakash sharma, 
+                        later it will throw error regarding workspace files access permission 
+                        from aakash sharma user to root user. */
                     }
+            }
 
-             
+
                             
-                    steps {
+            steps {
 
-                        //sh 'test -f build/index.html'
-                        sh '''
+                //sh 'test -f build/index.html'
+                sh '''
 
-                            # we are installing netlify as a local project dependency
-                            npm install netlify-cli node-jq
+                    # we are installing netlify as a local project dependency
+                    npm install netlify-cli node-jq
 
-                            node_modules/.bin/netlify --version
+                    node_modules/.bin/netlify --version
 
-                            echo "Deploying to Staging. Site ID : $NETLIFY_SITE_ID"
-                    
-                            # used to check the current authentication status and team information for the Netlify account we're logged into.
-                            node_modules/.bin/netlify status  
+                    echo "Deploying to Staging. Site ID : $NETLIFY_SITE_ID"
+            
+                    # used to check the current authentication status and team information for the Netlify account we're logged into.
+                    node_modules/.bin/netlify status  
 
-                            # Deploys the project to Netlify using the build directory as the source.
-                            # The --json flag outputs the response in JSON format and saves it in deploy-output.json.
-                            node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
-                            sleep 5
+                    # Deploys the project to Netlify using the build directory as the source.
+                    # The --json flag outputs the response in JSON format and saves it in deploy-output.json.
+                    node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
+                    sleep 5
 
-                            # Uses node-jq to parse the JSON output and extract the deploy_url field, which contains the deployed site's URL.
-                            # The . (period) in .deploy_url is used in JSON parsing with jq (or node-jq) to specify the field that we want to extract from the JSON structure.
-                            # The . (dot) before deploy_url means that we are accessing a top-level key in the JSON.
-                            # node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
+                    # Uses node-jq to parse the JSON output and extract the deploy_url field, which contains the deployed site's URL.
+                    # The . (period) in .deploy_url is used in JSON parsing with jq (or node-jq) to specify the field that we want to extract from the JSON structure.
+                    # The . (dot) before deploy_url means that we are accessing a top-level key in the JSON.
+                    # node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
 
-                            CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
-                            npx playwright test --reporter=html
-                        ''' 
-                        
-                    }
+                    CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
+                    #npx playwright test --reporter=html
+                    npx playwright test --reporter=html --project=chromium --base-url=$CI_ENVIRONMENT_URL
+                ''' 
+                
+            }
 
 
-                    post {
-                        always {                               
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E staging', reportTitles: '', useWrapperFileDirectly: true])   
-                        }
-                    }
+            post {
+                always {                               
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E staging', reportTitles: '', useWrapperFileDirectly: true])   
+                }
+            }
 
                 
         }
