@@ -6,28 +6,18 @@ pipeline {
 
         NETLIFY_SITE_ID = '2237487a-ebf2-4e48-b243-41c611efccae'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
-        REACT_APP_VERSION='1.2.3'
         
     }
 
     stages {
 
-        /*
-        stage('Docker') {
-
-            steps {
-                sh 'docker build -t my-playwright-image .'
-            }
-
-        } */
-
-
+        
         // Single line comment
         /* Multi-line comment
         if we want a shell command to be commented out in the shell script use # in front of it.
         eg. : #ls -la */
 
-        
+        /*
         stage('Build') {
 
             agent {
@@ -50,7 +40,7 @@ pipeline {
                 '''
             }
         } 
-    
+        */
 
         stage("Tests") {
 
@@ -196,6 +186,16 @@ pipeline {
             }
 
                 
+        }
+
+        stage('Approval') {
+
+            steps {
+                
+                timeout(time: 2, unit: 'MINUTES') {
+                    input message: 'Do you wish to deploy to Production?', ok: 'Yes, I am sure!'
+                }
+            }
         }
 
 
