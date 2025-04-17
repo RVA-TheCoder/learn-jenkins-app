@@ -182,6 +182,7 @@ pipeline {
                     # node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
 
                     CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
+                    echo "REACT_APP_VERSION : \$REACT_APP_VERSION"
                     npx playwright test --reporter=html
                     
                 ''' 
