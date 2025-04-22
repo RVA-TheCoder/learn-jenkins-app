@@ -12,14 +12,14 @@ pipeline {
 
     stages {
 
-        /*
+        
         stage('Docker') {
 
             steps {
                 sh 'docker build -t my-playwright-image .'
             }
 
-        } */
+        } 
 
 
         // Single line comment
@@ -241,7 +241,7 @@ pipeline {
                     node_modules/.bin/netlify deploy --dir=build --prod
                     sleep 5
 
-                    echo "REACT_APP_VERSION : \$REACT_APP_VERSION"
+                    echo "REACT_APP_VERSION : $REACT_APP_VERSION"
 
                     npx playwright test --reporter=html
                 ''' 
