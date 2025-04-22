@@ -12,6 +12,7 @@ pipeline {
 
     stages {
 
+        
         stage('Docker') {
 
             steps {
@@ -52,6 +53,7 @@ pipeline {
             }
         } 
     
+
         stage("Tests") {
 
             parallel {
@@ -84,6 +86,7 @@ pipeline {
                                    
                         }
                     }
+
 
                 }
 
@@ -140,7 +143,7 @@ pipeline {
 
                 docker {
                         // Playwright docker image, link : https://playwright.dev/docs/docker
-                        image 'my-playwright-image'
+                        image 'mcr.microsoft.com/playwright:v1.49.1-noble'
                         reuseNode true
 
                         /*args -u 'root:root' -> this command will start the container as a root user.
@@ -159,29 +162,35 @@ pipeline {
 
                 //sh 'test -f build/index.html'
                 sh '''
-                    netlify --version
+
+                    # we are installing netlify as a local project dependency
+                    npm install netlify-cli node-jq
+
+                    node_modules/.bin/netlify --version
+
                     echo "Deploying to Staging. Site ID : $NETLIFY_SITE_ID"
             
                     # used to check the current authentication status and team information for the Netlify account we're logged into.
-                    netlify status  
+                    node_modules/.bin/netlify status  
 
                     # Deploys the project to Netlify using the build directory as the source.
                     # The --json flag outputs the response in JSON format and saves it in deploy-output.json.
-                    netlify deploy --dir=build --json > deploy-output.json
+                    node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
                     sleep 5
 
                     # Uses node-jq to parse the JSON output and extract the deploy_url field, which contains the deployed site's URL.
                     # The . (period) in .deploy_url is used in JSON parsing with jq (or node-jq) to specify the field that we want to extract from the JSON structure.
                     # The . (dot) before deploy_url means that we are accessing a top-level key in the JSON.
-                    # node-jq -r '.deploy_url' deploy-output.json
+                    # node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
 
-                    CI_ENVIRONMENT_URL=$(node-jq -r '.deploy_url' deploy-output.json)
+                    CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
                     
                     npx playwright test --reporter=html
                     
                 ''' 
                 
             }
+
 
             post {
                 always {                               
@@ -199,7 +208,7 @@ pipeline {
 
                 docker {
                     // Playwright docker image, link : https://playwright.dev/docs/docker
-                    image 'my-playwright-image'
+                    image 'mcr.microsoft.com/playwright:v1.49.1-noble'
                     reuseNode true
 
                     /*args -u 'root:root' -> this command will start the container as a root user.
@@ -220,14 +229,18 @@ pipeline {
                 //sh 'test -f build/index.html'
                 sh '''
                     node --version
-                    netlify --version
+
+                    # we are installing netlify as a local project dependency
+                    npm install netlify-cli
+
+                    node_modules/.bin/netlify --version
 
                     echo "Deploying to production. Site ID : $NETLIFY_SITE_ID"
                     
                     # used to check the current authentication status and team information for the Netlify account we're logged into.
-                    netlify status
+                    node_modules/.bin/netlify status
 
-                    netlify deploy --dir=build --prod
+                    node_modules/.bin/netlify deploy --dir=build --prod
                     sleep 5
 
                     echo "REACT_APP_VERSION : $REACT_APP_VERSION"
