@@ -149,7 +149,7 @@ pipeline {
                 //sh 'test -f build/index.html'
                 sh '''
 
-                    # 'netlify' & 'node-jq' has been installed globally using the Dockerfile
+                    # 'netlify' & 'jq' has been installed globally using the Dockerfile
                     netlify --version
                     echo "Deploying to Staging. Site ID : $NETLIFY_SITE_ID"
             
@@ -161,12 +161,12 @@ pipeline {
                     netlify deploy --dir=build --json > deploy-output.json
                     sleep 5
 
-                    # Uses node-jq to parse the JSON output and extract the deploy_url field, which contains the deployed site's URL.
-                    # The . (period) in .deploy_url is used in JSON parsing with jq (or node-jq) to specify the field that we want to extract from the JSON structure.
+                    # Uses jq to parse the JSON output and extract the deploy_url field, which contains the deployed site's URL.
+                    # The . (period) in .deploy_url is used in JSON parsing with jq (or jq) to specify the field that we want to extract from the JSON structure.
                     # The . (dot) before deploy_url means that we are accessing a top-level key in the JSON.
-                    # node-jq -r '.deploy_url' deploy-output.json
+                    # jq -r '.deploy_url' deploy-output.json
 
-                    CI_ENVIRONMENT_URL=$(node-jq -r '.deploy_url' deploy-output.json)
+                    CI_ENVIRONMENT_URL=$(jq -r '.deploy_url' deploy-output.json)
                     
                     npx playwright test --reporter=html
                     
@@ -211,7 +211,7 @@ pipeline {
                 //sh 'test -f build/index.html'
                 sh '''
 
-                    # 'netlify' & 'node-jq' has been installed globally using the Dockerfile
+                    # 'netlify' & 'jq' has been installed globally using the Dockerfile
                     node --version
                     netlify --version
 
