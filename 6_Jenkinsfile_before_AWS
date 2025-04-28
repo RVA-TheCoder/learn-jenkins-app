@@ -18,21 +18,6 @@ pipeline {
         if we want a shell command to be commented out in the shell script use # in front of it.
         eg. : #ls -la */
 
-        stage('AWS') {
-            
-            agent {
-                docker {
-                    image 'amazon/aws-cli'
-                    args "--entrypoint=''"
-                }
-            }
-
-            steps {
-                sh '''
-                    aws --version
-                '''
-            }
-        }
         
         stage('Build') {
 
