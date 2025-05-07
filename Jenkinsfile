@@ -27,7 +27,7 @@ pipeline {
                 }
             }
             environment {
-                    #we can name it as per our requirement.
+                    // S3 bucket name ( we can name it as per our choice)
                     AWS_S3_BUCKET = "learn-jenkins-rva-28-04-2025"
 
             }
