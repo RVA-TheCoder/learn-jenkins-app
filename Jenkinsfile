@@ -39,7 +39,12 @@ pipeline {
                     aws --version
                     echo "Hello! S3, This is RVA" > index.html
                     aws s3 cp index.html s3://${AWS_S3_BUCKET}/index.html
+
+                    # This will list all the available S3 bucket
                     aws s3 ls
+
+                    # lists all files and folders in all subdirectories of $AWS_S3_BUCKET
+                    aws s3 ls s3://$AWS_S3_BUCKET --recursive
 
                 '''
                 }  
