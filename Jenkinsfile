@@ -26,13 +26,21 @@ pipeline {
                     args "--entrypoint=''"
                 }
             }
+            environment {
+                    #we can name it as per our requirement.
+                    AWS_S3_BUCKET = "learn-jenkins-rva-28-04-2025"
+
+            }
 
             steps {
 
                 withCredentials([usernamePassword(credentialsId: 'my-aws', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                  sh '''
                     aws --version
+                    echo "Hello! S3, This is RVA" > index.html
+                    aws s3 cp index.html s3://${AWS_S3_BUCKET}/index.html
                     aws s3 ls
+
                 '''
                 }  
             }
